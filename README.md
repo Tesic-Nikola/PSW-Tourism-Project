@@ -1,1 +1,1 @@
-# PSW-Tourism-Solo
+# PSW-Tourism-Project
