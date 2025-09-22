@@ -1,6 +1,0 @@
-@PSW_Tourism_App.Server_HostAddress = http://localhost:5020
-
-GET {{PSW_Tourism_App.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
