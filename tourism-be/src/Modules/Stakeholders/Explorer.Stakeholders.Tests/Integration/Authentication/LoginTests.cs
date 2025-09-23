@@ -14,7 +14,7 @@ public class LoginTests : BaseStakeholdersIntegrationTest
     public LoginTests(StakeholdersTestFactory factory) : base(factory) { }
 
     [Fact]
-    public void Successfully_logs_in()
+    public void Successfully_logs_in_tourist()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -34,12 +34,48 @@ public class LoginTests : BaseStakeholdersIntegrationTest
     }
 
     [Fact]
+    public void Successfully_logs_in_author()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var loginSubmission = new CredentialsDto { Username = "autor1@gmail.com", Password = "autor1" };
+
+        // Act
+        var authenticationResponse = ((ObjectResult)controller.Login(loginSubmission).Result).Value as AuthenticationTokensDto;
+
+        // Assert
+        authenticationResponse.ShouldNotBeNull();
+        var decodedAccessToken = new JwtSecurityTokenHandler().ReadJwtToken(authenticationResponse.AccessToken);
+        var personId = decodedAccessToken.Claims.FirstOrDefault(c => c.Type == "personId");
+        personId.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Successfully_logs_in_administrator()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var loginSubmission = new CredentialsDto { Username = "admin@gmail.com", Password = "admin" };
+
+        // Act
+        var authenticationResponse = ((ObjectResult)controller.Login(loginSubmission).Result).Value as AuthenticationTokensDto;
+
+        // Assert
+        authenticationResponse.ShouldNotBeNull();
+        var decodedAccessToken = new JwtSecurityTokenHandler().ReadJwtToken(authenticationResponse.AccessToken);
+        var personId = decodedAccessToken.Claims.FirstOrDefault(c => c.Type == "personId");
+        personId.ShouldNotBeNull();
+    }
+
+    [Fact]
     public void Not_registered_user_fails_login()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var loginSubmission = new CredentialsDto { Username = "turistaY@gmail.com", Password = "turista1" };
+        var loginSubmission = new CredentialsDto { Username = "nonexistent@gmail.com", Password = "password" };
 
         // Act
         var result = (ObjectResult)controller.Login(loginSubmission).Result;
@@ -54,7 +90,37 @@ public class LoginTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var loginSubmission = new CredentialsDto { Username = "turista3@gmail.com", Password = "123" };
+        var loginSubmission = new CredentialsDto { Username = "turista1@gmail.com", Password = "wrongpassword" };
+
+        // Act
+        var result = (ObjectResult)controller.Login(loginSubmission).Result;
+
+        // Assert
+        result.StatusCode.ShouldBe(404);
+    }
+
+    [Fact]
+    public void Empty_username_fails_login()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var loginSubmission = new CredentialsDto { Username = "", Password = "password" };
+
+        // Act
+        var result = (ObjectResult)controller.Login(loginSubmission).Result;
+
+        // Assert
+        result.StatusCode.ShouldBe(404);
+    }
+
+    [Fact]
+    public void Empty_password_fails_login()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var loginSubmission = new CredentialsDto { Username = "turista1@gmail.com", Password = "" };
 
         // Act
         var result = (ObjectResult)controller.Login(loginSubmission).Result;
