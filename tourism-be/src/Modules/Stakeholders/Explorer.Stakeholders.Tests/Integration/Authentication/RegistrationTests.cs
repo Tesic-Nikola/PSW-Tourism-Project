@@ -116,7 +116,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             Password = "password123",
             Name = "Petar",
             Surname = "Petrović",
-            Interests = new List<string> { "priroda", "umetnost", "sport", "šoping", "hrana" }
+            Interests = new List<string> { "priroda", "umetnost", "sport", "soping", "hrana" }
         };
 
         // Act
@@ -138,7 +138,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
         interestNames.ShouldContain("priroda");
         interestNames.ShouldContain("umetnost");
         interestNames.ShouldContain("sport");
-        interestNames.ShouldContain("šoping");
+        interestNames.ShouldContain("soping");
         interestNames.ShouldContain("hrana");
     }
 
