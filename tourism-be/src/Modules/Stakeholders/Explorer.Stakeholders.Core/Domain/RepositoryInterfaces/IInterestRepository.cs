@@ -7,5 +7,4 @@ public interface IInterestRepository
     Interest? GetByName(string name);
     Interest Create(Interest interest);
     PersonInterest CreatePersonInterest(PersonInterest personInterest);
-    void SaveChanges();
 }

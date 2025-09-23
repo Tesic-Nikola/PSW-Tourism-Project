@@ -1,4 +1,4 @@
-﻿DELETE FROM stakeholders."Interests";
-DELETE FROM stakeholders."PersonInterests";
-DELETE FROM stakeholders."People";
-DELETE FROM stakeholders."Users";
+﻿TRUNCATE TABLE stakeholders."PersonInterests" RESTART IDENTITY CASCADE;
+TRUNCATE TABLE stakeholders."Interests" RESTART IDENTITY CASCADE;
+TRUNCATE TABLE stakeholders."People" RESTART IDENTITY CASCADE;
+TRUNCATE TABLE stakeholders."Users" RESTART IDENTITY CASCADE;

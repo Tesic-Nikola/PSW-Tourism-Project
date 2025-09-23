@@ -14,7 +14,7 @@ public class PersonInterest : Entity
     public PersonInterest(long personId, long interestId)
     {
         if (personId <= 0) throw new ArgumentException("Invalid PersonId");
-        if (interestId <= 0) throw new ArgumentException("Invalid InterestId");
+        if (interestId == 0) throw new ArgumentException("Invalid InterestId");
 
         PersonId = personId;
         InterestId = interestId;

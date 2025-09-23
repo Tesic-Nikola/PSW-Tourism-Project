@@ -68,21 +68,22 @@ public class AuthenticationService : IAuthenticationService
                 var interest = _interestRepository.GetByName(interestName);
                 if (interest == null)
                 {
-                    interest = new Interest(interestName);
-                    _interestRepository.Create(interest);
-                    _interestRepository.SaveChanges(); // Save to get the ID
+                    interest = _interestRepository.Create(new Interest(interestName));
                 }
 
                 var personInterest = new PersonInterest(person.Id, interest.Id);
                 _interestRepository.CreatePersonInterest(personInterest);
             }
 
-            _interestRepository.SaveChanges();
             return _tokenGenerator.GenerateAccessToken(user, person.Id);
         }
         catch (ArgumentException e)
         {
             return Result.Fail(FailureCode.InvalidArgument).WithError(e.Message);
+        }
+        catch (Exception e) // Add this to catch any other exceptions
+        {
+            return Result.Fail(FailureCode.Internal).WithError(e.Message);
         }
     }
 }

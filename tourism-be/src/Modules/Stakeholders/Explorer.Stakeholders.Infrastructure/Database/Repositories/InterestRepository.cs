@@ -20,17 +20,14 @@ public class InterestRepository : IInterestRepository
     public Interest Create(Interest interest)
     {
         _context.Interests.Add(interest);
+        _context.SaveChanges();
         return interest;
     }
 
     public PersonInterest CreatePersonInterest(PersonInterest personInterest)
     {
         _context.PersonInterests.Add(personInterest);
-        return personInterest;
-    }
-
-    public void SaveChanges()
-    {
         _context.SaveChanges();
+        return personInterest;
     }
 }

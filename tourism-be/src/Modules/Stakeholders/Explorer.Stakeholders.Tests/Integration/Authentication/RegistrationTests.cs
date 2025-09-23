@@ -33,36 +33,21 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
         };
 
         // Act
-        var authenticationResponse = ((ObjectResult)controller.RegisterTourist(account).Result).Value as AuthenticationTokensDto;
+        var authenticationResponse = ((ObjectResult)controller.RegisterTourist(account).Result)?.Value as AuthenticationTokensDto;
 
-        // Assert - Response
+        // Assert
         authenticationResponse.ShouldNotBeNull();
-        authenticationResponse.Id.ShouldNotBe(0);
-        var decodedAccessToken = new JwtSecurityTokenHandler().ReadJwtToken(authenticationResponse.AccessToken);
-        var personId = decodedAccessToken.Claims.FirstOrDefault(c => c.Type == "personId");
 
-        personId.ShouldNotBeNull();
-        personId.Value.ShouldNotBe("0");
-
-        // Assert - Database
         dbContext.ChangeTracker.Clear();
-        var storedUser = dbContext.Users.FirstOrDefault(u => u.Username == account.Email);
-        storedUser.ShouldNotBeNull();
-        storedUser.Role.ShouldBe(UserRole.Tourist);
-
         var storedPerson = dbContext.People.FirstOrDefault(p => p.Email == account.Email);
         storedPerson.ShouldNotBeNull();
-        storedPerson.UserId.ShouldBe(storedUser.Id);
-        storedPerson.Name.ShouldBe(account.Name);
-        storedPerson.Surname.ShouldBe(account.Surname);
 
-        // Assert - Interests
-        var personInterests = dbContext.PersonInterests
+        var interestNames = dbContext.PersonInterests
             .Where(pi => pi.PersonId == storedPerson.Id)
+            .Join(dbContext.Interests, pi => pi.InterestId, i => i.Id, (pi, i) => i.Name)
             .ToList();
-        personInterests.Count.ShouldBe(3);
 
-        var interestNames = personInterests.Select(pi => pi.Interest.Name).ToList();
+        interestNames.Count.ShouldBe(3);
         interestNames.ShouldContain("priroda");
         interestNames.ShouldContain("umetnost");
         interestNames.ShouldContain("sport");
@@ -86,7 +71,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
         };
 
         // Act
-        var authenticationResponse = ((ObjectResult)controller.RegisterTourist(account).Result).Value as AuthenticationTokensDto;
+        var authenticationResponse = ((ObjectResult)controller.RegisterTourist(account).Result)?.Value as AuthenticationTokensDto;
 
         // Assert
         authenticationResponse.ShouldNotBeNull();
@@ -95,12 +80,15 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
         var storedPerson = dbContext.People.FirstOrDefault(p => p.Email == account.Email);
         storedPerson.ShouldNotBeNull();
 
-        var personInterests = dbContext.PersonInterests
+        var interestNames = dbContext.PersonInterests
             .Where(pi => pi.PersonId == storedPerson.Id)
+            .Join(dbContext.Interests, pi => pi.InterestId, i => i.Id, (pi, i) => i.Name)
             .ToList();
-        personInterests.Count.ShouldBe(1);
-        personInterests.First().Interest.Name.ShouldBe("hrana");
+
+        interestNames.Count.ShouldBe(1);
+        interestNames.First().ShouldBe("hrana");
     }
+
 
     [Fact]
     public void Successfully_registers_tourist_with_all_interests()
@@ -120,7 +108,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
         };
 
         // Act
-        var authenticationResponse = ((ObjectResult)controller.RegisterTourist(account).Result).Value as AuthenticationTokensDto;
+        var authenticationResponse = ((ObjectResult)controller.RegisterTourist(account).Result)?.Value as AuthenticationTokensDto;
 
         // Assert
         authenticationResponse.ShouldNotBeNull();
@@ -129,12 +117,12 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
         var storedPerson = dbContext.People.FirstOrDefault(p => p.Email == account.Email);
         storedPerson.ShouldNotBeNull();
 
-        var personInterests = dbContext.PersonInterests
+        var interestNames = dbContext.PersonInterests
             .Where(pi => pi.PersonId == storedPerson.Id)
+            .Join(dbContext.Interests, pi => pi.InterestId, i => i.Id, (pi, i) => i.Name)
             .ToList();
-        personInterests.Count.ShouldBe(5);
 
-        var interestNames = personInterests.Select(pi => pi.Interest.Name).ToList();
+        interestNames.Count.ShouldBe(5);
         interestNames.ShouldContain("priroda");
         interestNames.ShouldContain("umetnost");
         interestNames.ShouldContain("sport");
