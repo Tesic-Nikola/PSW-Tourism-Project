@@ -29,7 +29,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             Password = "newuser123",
             Name = "Marko",
             Surname = "Marković",
-            Interests = new List<string> { "priroda", "umetnost", "sport" }
+            Interests = new List<string> { "Nature", "Art", "Sport" }
         };
 
         // Act
@@ -48,9 +48,9 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             .ToList();
 
         interestNames.Count.ShouldBe(3);
-        interestNames.ShouldContain("priroda");
-        interestNames.ShouldContain("umetnost");
-        interestNames.ShouldContain("sport");
+        interestNames.ShouldContain("Nature");
+        interestNames.ShouldContain("Art");
+        interestNames.ShouldContain("Sport");
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             Password = "password123",
             Name = "Ana",
             Surname = "Anić",
-            Interests = new List<string> { "hrana" }
+            Interests = new List<string> { "Food" }
         };
 
         // Act
@@ -86,7 +86,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             .ToList();
 
         interestNames.Count.ShouldBe(1);
-        interestNames.First().ShouldBe("hrana");
+        interestNames.First().ShouldBe("Food");
     }
 
 
@@ -104,7 +104,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             Password = "password123",
             Name = "Petar",
             Surname = "Petrović",
-            Interests = new List<string> { "priroda", "umetnost", "sport", "soping", "hrana" }
+            Interests = new List<string> { "Nature", "Art", "Sport", "Shopping", "Food" }
         };
 
         // Act
@@ -123,11 +123,11 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             .ToList();
 
         interestNames.Count.ShouldBe(5);
-        interestNames.ShouldContain("priroda");
-        interestNames.ShouldContain("umetnost");
-        interestNames.ShouldContain("sport");
-        interestNames.ShouldContain("soping");
-        interestNames.ShouldContain("hrana");
+        interestNames.ShouldContain("Nature");
+        interestNames.ShouldContain("Art");
+        interestNames.ShouldContain("Sport");
+        interestNames.ShouldContain("Shopping");
+        interestNames.ShouldContain("Food");
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             Password = "password123",
             Name = "Test",
             Surname = "User",
-            Interests = new List<string> { "invalidinterest", "priroda" }
+            Interests = new List<string> { "invalidinterest", "Nature" }
         };
 
         // Act
@@ -191,7 +191,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             Password = "password123",
             Name = "Test",
             Surname = "User",
-            Interests = new List<string> { "priroda" }
+            Interests = new List<string> { "Nature" }
         };
 
         // Act
@@ -215,7 +215,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             Password = "password123",
             Name = "Test",
             Surname = "User",
-            Interests = new List<string> { "priroda" }
+            Interests = new List<string> { "Nature" }
         };
 
         // Act
@@ -239,7 +239,7 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
             Password = "",
             Name = "",
             Surname = "",
-            Interests = new List<string> { "priroda" }
+            Interests = new List<string> { "Nature" }
         };
 
         // Act

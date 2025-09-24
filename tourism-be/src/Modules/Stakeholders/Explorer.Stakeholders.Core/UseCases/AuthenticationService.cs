@@ -16,7 +16,7 @@ public class AuthenticationService : IAuthenticationService
 
     private static readonly List<string> ValidInterests = new()
     {
-        "priroda", "umetnost", "sport", "soping", "hrana"
+        "Nature", "Art", "Sport", "Shopping", "Food"
     };
 
     public AuthenticationService(IUserRepository userRepository, ICrudRepository<Person> personRepository,
