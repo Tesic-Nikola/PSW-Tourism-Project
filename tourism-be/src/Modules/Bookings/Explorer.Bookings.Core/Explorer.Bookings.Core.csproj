@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Explorer.Bookings.API\Explorer.Bookings.API.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Domain\" />
+		<Folder Include="Mappers\" />
+		<Folder Include="UseCases\" />
+	</ItemGroup>
+
+</Project>
