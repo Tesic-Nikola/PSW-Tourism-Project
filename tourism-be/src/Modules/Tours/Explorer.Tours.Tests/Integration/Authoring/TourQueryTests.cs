@@ -25,7 +25,7 @@ public class TourQueryTests : BaseToursIntegrationTest
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(2); // Author -11 has 2 tours
+        result.Count.ShouldBe(3); // Author -11 has 3 tours
         result.All(t => t.AuthorId == -11).ShouldBeTrue();
     }
 
@@ -41,9 +41,11 @@ public class TourQueryTests : BaseToursIntegrationTest
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(1); // Author -11 has 1 draft tour
+        result.Count.ShouldBe(2); // Author -11 has 2 draft tour
         result.First().Status.ShouldBe(0); // Draft
         result.First().Name.ShouldBe("Nature Walk");
+        result[1].Status.ShouldBe(0);
+        result[1].Name.ShouldBe("Art Gallery Tour");
     }
 
     [Fact]
@@ -60,7 +62,7 @@ public class TourQueryTests : BaseToursIntegrationTest
         result.ShouldNotBeNull();
         result.Count.ShouldBe(1); // Author -11 has 1 published tour
         result.First().Status.ShouldBe(1); // Published
-        result.First().Name.ShouldBe("Art Gallery Tour");
+        result.First().Name.ShouldBe("City Walking Tour");
     }
 
     [Fact]
@@ -78,7 +80,7 @@ public class TourQueryTests : BaseToursIntegrationTest
         result.Id.ShouldBe(-2);
         result.Name.ShouldBe("Art Gallery Tour");
         result.AuthorId.ShouldBe(-11);
-        result.Status.ShouldBe(1); // Published
+        result.Status.ShouldBe(0); // Draft
     }
 
     private static TourController CreateController(IServiceScope scope)
