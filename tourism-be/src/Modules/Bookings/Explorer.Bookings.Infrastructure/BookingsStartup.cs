@@ -2,8 +2,10 @@
 using Explorer.Bookings.Core.Domain.RepositoryInterfaces;
 using Explorer.Bookings.Core.Mappers;
 using Explorer.Bookings.Core.UseCases;
+using Explorer.Bookings.Core.UseCases.EventHandlers;
 using Explorer.Bookings.Infrastructure.Database;
 using Explorer.Bookings.Infrastructure.Database.Repositories;
+using Explorer.BuildingBlocks.Core.Events;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +20,7 @@ public static class BookingsStartup
         services.AddAutoMapper(typeof(BookingsProfile).Assembly);
         SetupCore(services);
         SetupInfrastructure(services);
+        SetupEventHandlers(services);
         return services;
     }
 
@@ -37,5 +40,11 @@ public static class BookingsStartup
         services.AddDbContext<BookingsContext>(opt =>
             opt.UseNpgsql(DbConnectionStringBuilder.Build("bookings"),
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "bookings")));
+    }
+
+    private static void SetupEventHandlers(IServiceCollection services)
+    {
+        services.AddScoped<IEventHandler<TourInfoResponseEvent>, TourInfoResponseEventHandler>();
+        services.AddScoped<IEventHandler<TouristInfoResponseEvent>, TouristInfoResponseEventHandler>();
     }
 }

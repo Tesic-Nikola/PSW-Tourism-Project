@@ -1,3 +1,4 @@
+using Explorer.BuildingBlocks.Core.Events;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Stakeholders.API.Public;
@@ -5,6 +6,7 @@ using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Mappers;
 using Explorer.Stakeholders.Core.UseCases;
+using Explorer.Stakeholders.Core.UseCases.EventHandlers;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database.Repositories;
@@ -20,6 +22,7 @@ public static class StakeholdersStartup
         services.AddAutoMapper(typeof(StakeholderProfile).Assembly);
         SetupCore(services);
         SetupInfrastructure(services);
+        SetupEventHandlers(services);
         return services;
     }
 
@@ -40,5 +43,10 @@ public static class StakeholdersStartup
         services.AddDbContext<StakeholdersContext>(opt =>
             opt.UseNpgsql(DbConnectionStringBuilder.Build("stakeholders"),
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "stakeholders")));
+    }
+
+    private static void SetupEventHandlers(IServiceCollection services)
+    {
+        services.AddScoped<IEventHandler<TouristInfoRequestedEvent>, TouristInfoEventHandler>();
     }
 }

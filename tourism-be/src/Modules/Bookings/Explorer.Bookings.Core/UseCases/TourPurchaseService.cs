@@ -3,6 +3,8 @@ using Explorer.Bookings.API.Dtos;
 using Explorer.Bookings.API.Public;
 using Explorer.Bookings.Core.Domain;
 using Explorer.Bookings.Core.Domain.RepositoryInterfaces;
+using Explorer.Bookings.Core.UseCases.EventHandlers;
+using Explorer.BuildingBlocks.Core.Events;
 using Explorer.BuildingBlocks.Core.UseCases;
 using FluentResults;
 
@@ -13,18 +15,21 @@ public class TourPurchaseService : BaseService<TourPurchaseDto, TourPurchase>, I
     private readonly ITourPurchaseRepository _purchaseRepository;
     private readonly IShoppingCartRepository _cartRepository;
     private readonly IBonusPointsRepository _bonusPointsRepository;
+    private readonly IEventBus _eventBus;
 
     public TourPurchaseService(ITourPurchaseRepository purchaseRepository,
         IShoppingCartRepository cartRepository,
         IBonusPointsRepository bonusPointsRepository,
+        IEventBus eventBus,
         IMapper mapper) : base(mapper)
     {
         _purchaseRepository = purchaseRepository;
         _cartRepository = cartRepository;
         _bonusPointsRepository = bonusPointsRepository;
+        _eventBus = eventBus;
     }
 
-    public Result<TourPurchaseDto> Checkout(long touristId, CheckoutDto checkoutDto)
+    public async Task<Result<TourPurchaseDto>> Checkout(long touristId, CheckoutDto checkoutDto)
     {
         try
         {
@@ -72,11 +77,27 @@ public class TourPurchaseService : BaseService<TourPurchaseDto, TourPurchase>, I
             cart.MarkAsUpdated();
             _cartRepository.Update(cart);
 
-            // TODO: Send email confirmation via events/messaging to BuildingBlocks Email Service
-            // Need to get tourist email from Stakeholders module via cross-module communication
-            // This will need to be implemented when email service is available
+            var purchaseDto = MapToDto(purchase);
 
-            return MapToDto(purchase);
+            // Send tourist info request for email confirmation
+            var pendingRequest = new PendingCheckoutRequest(touristId, checkoutDto, purchaseDto);
+            var touristInfoEvent = new TouristInfoRequestedEvent(touristId);
+            TouristInfoResponseEventHandler.AddPendingRequest(touristInfoEvent.RequestId, pendingRequest);
+
+            await _eventBus.PublishAsync(touristInfoEvent);
+
+            // Wait for email to be sent (with timeout)
+            try
+            {
+                using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                await pendingRequest.CompletionSource.Task.WaitAsync(cancellationTokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Email timeout - continue without email, purchase is still valid
+            }
+
+            return Result.Ok(purchaseDto);
         }
         catch (ArgumentException e)
         {

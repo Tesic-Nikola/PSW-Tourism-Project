@@ -19,6 +19,8 @@
     <ProjectReference Include="..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
     <ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj" />
+	<ProjectReference Include="..\Modules\Bookings\Explorer.Bookings.API\Explorer.Bookings.API.csproj" />
+	<ProjectReference Include="..\Modules\Bookings\Explorer.Bookings.Infrastructure\Explorer.Bookings.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
     <ProjectReference Include="..\Modules\Tours\Explorer.Tours.Infrastructure\Explorer.Tours.Infrastructure.csproj" />
   </ItemGroup>

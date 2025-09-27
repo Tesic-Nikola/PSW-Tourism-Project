@@ -3,6 +3,8 @@ using Explorer.Bookings.API.Dtos;
 using Explorer.Bookings.API.Public;
 using Explorer.Bookings.Core.Domain;
 using Explorer.Bookings.Core.Domain.RepositoryInterfaces;
+using Explorer.Bookings.Core.UseCases.EventHandlers;
+using Explorer.BuildingBlocks.Core.Events;
 using Explorer.BuildingBlocks.Core.UseCases;
 using FluentResults;
 
@@ -11,10 +13,12 @@ namespace Explorer.Bookings.Core.UseCases;
 public class ShoppingCartService : BaseService<ShoppingCartDto, ShoppingCart>, IShoppingCartService
 {
     private readonly IShoppingCartRepository _cartRepository;
+    private readonly IEventBus _eventBus;
 
-    public ShoppingCartService(IShoppingCartRepository cartRepository, IMapper mapper) : base(mapper)
+    public ShoppingCartService(IShoppingCartRepository cartRepository, IEventBus eventBus, IMapper mapper) : base(mapper)
     {
         _cartRepository = cartRepository;
+        _eventBus = eventBus;
     }
 
     public Result<ShoppingCartDto> GetCart(long touristId)
@@ -36,46 +40,34 @@ public class ShoppingCartService : BaseService<ShoppingCartDto, ShoppingCart>, I
         }
     }
 
-    public Result<ShoppingCartDto> AddToCart(long touristId, AddToCartDto addToCartDto)
+    public async Task<Result<ShoppingCartDto>> AddToCart(long touristId, AddToCartDto addToCartDto)
     {
         try
         {
-            var cart = _cartRepository.GetByTouristId(touristId);
-            if (cart == null)
-            {
-                cart = new ShoppingCart(touristId);
-                cart = _cartRepository.Create(cart);
-            }
+            // Create pending request
+            var pendingRequest = new PendingCartRequest(touristId, addToCartDto);
 
-            // TODO: Get tour information from Tours module via events/messaging
-            // For now, we'll need to receive tour data through events when a tour is added to cart
-            // This is a placeholder until cross-module communication is implemented
+            // Send event to get tour information
+            var tourInfoEvent = new TourInfoRequestedEvent(addToCartDto.TourId, touristId, addToCartDto.Quantity);
+            TourInfoResponseEventHandler.AddPendingRequest(tourInfoEvent.RequestId, pendingRequest);
 
-            var existingItem = cart.Items.FirstOrDefault(i => i.TourId == addToCartDto.TourId);
-            if (existingItem != null)
-            {
-                // Update quantity in existing item
-                cart.Items.Remove(existingItem);
-                var newItem = new CartItem(existingItem.TourId, existingItem.TourName,
-                    existingItem.TourPrice, existingItem.TourStartDate,
-                    existingItem.Quantity + addToCartDto.Quantity);
-                cart.Items.Add(newItem);
-            }
-            else
-            {
-                // This will need to be populated from tour data received via events
-                throw new InvalidOperationException("Tour information not available. Cross-module communication needed.");
-            }
+            await _eventBus.PublishAsync(tourInfoEvent);
 
-            cart.MarkAsUpdated();
-            cart = _cartRepository.Update(cart);
-            return MapToDto(cart);
+            // Wait for response with timeout
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            var cartDto = await pendingRequest.CompletionSource.Task.WaitAsync(cancellationTokenSource.Token);
+
+            return Result.Ok(cartDto);
+        }
+        catch (OperationCanceledException)
+        {
+            return Result.Fail(FailureCode.InvalidArgument).WithError("Request timeout - tour information not available");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result.Fail(FailureCode.InvalidArgument).WithError(ex.Message);
         }
         catch (ArgumentException e)
-        {
-            return Result.Fail(FailureCode.InvalidArgument).WithError(e.Message);
-        }
-        catch (InvalidOperationException e)
         {
             return Result.Fail(FailureCode.InvalidArgument).WithError(e.Message);
         }
